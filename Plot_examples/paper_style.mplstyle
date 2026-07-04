@@ -1,0 +1,21 @@
+# Grosores y tamaños generales
+axes.linewidth: 1.4
+axes.labelsize: 24
+xtick.labelsize: 16
+ytick.labelsize: 16
+
+# Configuración de los Ticks Mayores
+xtick.direction: in
+ytick.direction: in
+xtick.major.size: 9
+ytick.major.size: 9
+xtick.major.width: 1.2
+ytick.major.width: 1.2
+
+# Configuración de los Ticks Menores
+xtick.minor.visible: True
+ytick.minor.visible: True
+xtick.minor.size: 5
+ytick.minor.size: 5
+xtick.minor.width: 1.0
+ytick.minor.width: 1.0

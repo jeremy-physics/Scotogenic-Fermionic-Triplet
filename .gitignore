@@ -1,0 +1,57 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+*.old
+.agents/
+.vscode/
+tmp/
+
+# Keep top-level output folders.
+!outputs/
+!outputs/analyses/
+!outputs/plots/
+!outputs/analyses/.gitkeep
+!outputs/plots/.gitkeep
+
+# Analysis output folders: do not ignore folders themselves.
+# Ignore heavy generated numerical outputs by default.
+outputs/analyses/*/optimization/*
+outputs/analyses/*/data/scans/*
+outputs/analyses/*/data/stats/*
+outputs/analyses/*/data/merged/*
+outputs/analyses/*/logs/*
+
+# Keep lightweight reproducibility files visible.
+!outputs/analyses/**/.gitkeep
+!outputs/analyses/**/notes.txt
+!outputs/analyses/**/settings_snapshot/
+!outputs/analyses/**/settings_snapshot/*.py
+!outputs/analyses/**/source_snapshot/
+!outputs/analyses/**/source_snapshot/*.py
+
+# PlotSets: ignore generated figures and heavy binary/numerical artifacts by default.
+outputs/plots/**/*.pdf
+outputs/plots/**/*.png
+outputs/plots/**/*.jpg
+outputs/plots/**/*.jpeg
+outputs/plots/**/*.svg
+outputs/plots/**/*.npy
+outputs/plots/**/*.npz
+
+# Keep plot scripts and lightweight metadata visible.
+!outputs/plots/**/
+!outputs/plots/**/*.py
+!outputs/plots/**/*.md
+!outputs/plots/**/README*
+!outputs/plots/**/.gitkeep
+
+# Analysis configuration files should always be visible.
+!settings/analyses/
+!settings/analyses/*.py
+
+external/micromegas/libmicromegas.so

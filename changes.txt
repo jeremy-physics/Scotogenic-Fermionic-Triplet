@@ -1,0 +1,9 @@
+"lambda_phi" dentro de QUARTIC_COUPLINGS pero no en INPUT_PARAMETERS
+SCALAR_COUPLINGS debe contener QUADRATIC_PARAMETERS, TRILINEAR_COUPLINGS y QUARTIC_COUPLINGS
+INERT_MASSES son mR, mI, mCH
+SCALAR_MASSES = VISIBLE_MASSES + INERT_MASSES
+Revisar consistencia de direct detection y dark matter
+Actualizar DIRECT_DETECTION en variables
+En targets se añade sigma_si como observable de detección directa
+se actualizó OBSERVABLE_TO_CHI_TARGET_SETS
+actualizar penalización de la suma de neutrinos para incluir penalización superior e inferior
