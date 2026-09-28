@@ -27,10 +27,11 @@ DATA_PATH = ROOT / "outputs" / "analyses" / "analysis_dd" / "data" / "scans" / "
 OUTPUT_PATH = Path(__file__).with_name("fig08_sigma_alpha.pdf")
 STYLE_PATH = ROOT / "styles" / "paper_style_colorbar.mplstyle"
 
-LZ = 8.78658722623048e-47
-XENONNT = 4.484204325419306e-47
-DARWIN = 2.67279895071297e-47
-ARGO = 8.130408367888161e-48
+LZ = 7.413460268587916e-47
+XENONNT = 4.0920440344790904e-47
+DARKSIDE = 1.9212420771126029e-47
+DARWIN = 5.895523679499314e-48
+ARGO = 3.6753483466448516e-48
 PURE_EW_SIGMA = 2.15e-47
 
 YUKAWA_LIMIT = np.sqrt(4.0 * np.pi)

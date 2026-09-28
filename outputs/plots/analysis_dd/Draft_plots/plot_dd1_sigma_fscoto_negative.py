@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("pgf")
 import matplotlib.pyplot as plt
-from matplotlib.ticker import ScalarFormatter
+from matplotlib import transforms
 
 
 # === GLOBAL PLOT CONFIGURATION ===
@@ -14,22 +14,21 @@ PLOT_TEMPLATE_PATH = ROOT / "scripts"
 if str(PLOT_TEMPLATE_PATH) not in sys.path:
     sys.path.insert(0, str(PLOT_TEMPLATE_PATH))
 
-from plot_template import c0, c1, c3, c4, c5, c6, c_reg1, c_esc1
+from plot_template import c5, c6, c_esc1
 
 DATA_PATH = ROOT / "outputs" / "analyses" / "analysis_dd" / "data" / "scans" / "scan_lfv.dat"
-OUTPUT_PATH = Path(__file__).with_name("fig12_sigma_lambda_phi_sigma_mH2.pdf")
-STYLE_PATH = ROOT / "styles" / "paper_style_colorbar.mplstyle"
+OUTPUT_PATH = Path(__file__).with_name("DD_fscoto_negative.pdf")
+STYLE_PATH = ROOT / "styles" / "paper_style.mplstyle"
 
 LZ = 7.413460268587916e-47
-XENONNT = 4.0920440344790904e-47
-DARKSIDE = 1.9212420771126029e-47
-DARWIN = 5.895523679499314e-48
-ARGO = 3.6753483466448516e-48
-PURE_EW_SIGMA = 2.15e-47
+PURE_EW_SIGMA = 2.434770333230314e-47
 
+FTREE_SCALE = 1e-8
 YUKAWA_LIMIT = np.sqrt(4.0 * np.pi)
 POINT_SIZE = 9
 CROSS_SIZE = 13
+X_LIMITS = (2e-5, 4e-1)
+Y_LIMITS = (5e-53, 0.9e-44)
 
 
 # === DATA LOADING AND PREPARATION ===
@@ -45,8 +44,7 @@ def load_scan(path):
 
 scan = load_scan(DATA_PATH)
 alpha = scan["alpha"]
-lambda_phi_sigma = scan["lambda_phi_sigma"]
-mHH = scan["mHH"]
+ftree = scan["ftree"]
 sigma_si = scan["sigma_si"]
 yXi_max = np.maximum.reduce(
     [
@@ -59,16 +57,15 @@ yXi_max = np.maximum.reduce(
     ]
 )
 
-with np.errstate(divide="ignore", invalid="ignore"):
-    x_values = lambda_phi_sigma / mHH**2
-
+x_values = -ftree / FTREE_SCALE
 y_values = sigma_si
 mask_yukawa = np.isfinite(yXi_max) & (yXi_max <= YUKAWA_LIMIT)
 mask_base = (
     mask_yukawa
+    & (ftree < 0.0)
     & np.isfinite(x_values)
     & np.isfinite(y_values)
-    & (mHH > 0.0)
+    & (x_values > 0.0)
     & (y_values > 0.0)
 )
 mask_good = mask_base & (np.cos(alpha) > 0.95)
@@ -85,7 +82,8 @@ plt.rc("font", family="serif")
 
 
 # === FIGURE AND AXES ===
-fig, ax = plt.subplots(figsize=(8.0, 5.0))
+fig, ax = plt.subplots(figsize=(6.0, 5.0))
+trans_xaxes_ydata = transforms.blended_transform_factory(ax.transAxes, ax.transData)
 
 
 # === PLOTS ===
@@ -117,96 +115,63 @@ ax.scatter(
 # === LINES AND REGIONS ===
 ax.axhline(LZ, color=c_esc1, linestyle="-", linewidth=1.2, zorder=3)
 ax.axhline(PURE_EW_SIGMA, color="red", linestyle="-", linewidth=1.1, zorder=3)
-ax.axhline(XENONNT, color=c1, linestyle="-.", linewidth=1.3, zorder=3)
-ax.axhline(DARKSIDE, color=c3, linestyle="-.", linewidth=1.3, zorder=3)
-ax.axhline(DARWIN, color=c4, linestyle="-.", linewidth=1.3, zorder=3)
-ax.axhline(ARGO, color=c0, linestyle="-.", linewidth=1.3, zorder=3)
-ax.fill_between(
-    [-1.6e-7, 1.6e-7],
-    LZ,
-    1e-40,
-    color=c_reg1,
-    alpha=0.28,
-    zorder=0,
-    rasterized=True,
-)
 
 
 # === TEXTS, ANNOTATIONS AND MARKERS ===
 line_label_style = {
     "va": "bottom",
     "ha": "right",
-    "fontsize": 9,
+    "fontsize": 11,
     "zorder": 10,
 }
-label_x = 0.97e-7
+branch_label_style = {
+    "va": "bottom",
+    "ha": "right",
+    "fontsize": 14,
+    "zorder": 10,
+}
 ax.annotate(
     r"LUX-ZEPLIN $(4.5\mathrm{t}\times \mathrm{y})$",
-    xy=(label_x, LZ),
+    xy=(8e-4, LZ),
     xytext=(0, 3),
     textcoords="offset points",
     color=c_esc1,
     **line_label_style,
 )
-ax.annotate(
-    r"XENONnT $(20\mathrm{t}\times \mathrm{y})$",
-    xy=(label_x, XENONNT),
-    xytext=(0, 3),
-    textcoords="offset points",
-    color=c1,
-    **line_label_style,
-)
-ax.annotate(
-    r"DARWIN $(200\mathrm{t}\times \mathrm{y})$",
-    xy=(label_x, DARWIN),
-    xytext=(0, 3),
-    textcoords="offset points",
-    color=c4,
-    **line_label_style,
-)
-ax.annotate(
-    r"Minimal triplet model",
-    xy=(label_x, PURE_EW_SIGMA),
-    xytext=(0, 3),
-    textcoords="offset points",
-    color='red',
-    **line_label_style,
-    #va="top",
-    #ha="right",
-    #fontsize=9,
-    #zorder=10,
-)
-ax.annotate(
-    r"Dark-Side20k",
-    xy=(label_x, DARKSIDE),
-    xytext=(0,-3),
-    textcoords="offset points",
-    color=c3,
-    va="top",
-    ha="right",
-    fontsize=9,
+ax.text(
+    0.02,
+    PURE_EW_SIGMA * 1.04,
+    r"Minimal fermionic triplet",
+    transform=trans_xaxes_ydata,
+    color="red",
+    va="bottom",
+    ha="left",
+    fontsize=10,
     zorder=10,
 )
 ax.annotate(
-    r"ARGO $(3000\mathrm{t}\times \mathrm{y})$",
-    xy=(label_x, ARGO),
-    xytext=(0, 3),
+    r"$f_q^{\rm scoto}<0$",
+    xy=(2e-4, 1.5e-45),
+    xytext=(0, 0),
     textcoords="offset points",
-    color=c0,
-    **line_label_style,
+    color="black",
+    bbox={
+        "boxstyle": "round,pad=0.3",
+        "facecolor": "white",
+        "edgecolor": "black",
+        "alpha": 0.9,
+    },
+    **branch_label_style,
 )
 
 
-# === AXES ===
-ax.set_xlabel(r"$\lambda_{\phi\sigma}/m_H^2\ [{\rm GeV}^{-2}]$")
-ax.set_ylabel(r"$\sigma^N_{\rm SI}\ [{\rm cm}^2]$")
+# === AXES AND LEGEND ===
+ax.set_xlabel(r"$|f_q^{\rm scoto}|/(10^{-8}\,{\rm GeV}^{-3})$")
+ax.set_ylabel(r"$\sigma_{\rm SI}\ [{\rm cm}^2]$")
+ax.set_xscale("log")
 ax.set_yscale("log")
-ax.set_xlim(-1.0e-7, 1.0e-7)
-ax.set_ylim(9e-49, 2e-45)
-
-x_formatter = ScalarFormatter(useMathText=True)
-x_formatter.set_powerlimits((0, 0))
-ax.xaxis.set_major_formatter(x_formatter)
+ax.set_xlim(*X_LIMITS)
+ax.set_ylim(*Y_LIMITS)
 
 
 # === EXPORT ===

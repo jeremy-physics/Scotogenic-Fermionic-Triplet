@@ -22,7 +22,7 @@ bounds = (
 LOG_IDX = np.arange(16)
 
 MIN_EXP = np.array([2] * 3 + [-4] * 8 + [2] * 4 + [-5])
-MAX_EXP = np.array([4] * 3 + [0] * 8 + [4] * 4 + [-1])
+MAX_EXP = np.array([4] * 3 + [0] * 8 + [4] * 4 + [-1])#zXi up to log10(5e-2)
 
 
 SCAN_PARAMETER_NAMES = list(INPUT_PARAMETERS)

@@ -3,9 +3,9 @@ import sys
 
 import numpy as np
 import matplotlib
+
 matplotlib.use("pgf")
 import matplotlib.pyplot as plt
-from matplotlib.ticker import ScalarFormatter
 
 
 # === GLOBAL PLOT CONFIGURATION ===
@@ -17,7 +17,7 @@ if str(PLOT_TEMPLATE_PATH) not in sys.path:
 from plot_template import c0, c1, c3, c4, c5, c6, c_reg1, c_esc1
 
 DATA_PATH = ROOT / "outputs" / "analyses" / "analysis_dd" / "data" / "scans" / "scan_lfv.dat"
-OUTPUT_PATH = Path(__file__).with_name("fig12_sigma_lambda_phi_sigma_mH2.pdf")
+OUTPUT_PATH = Path(__file__).with_name("DD_mH.pdf")
 STYLE_PATH = ROOT / "styles" / "paper_style_colorbar.mplstyle"
 
 LZ = 7.413460268587916e-47
@@ -25,11 +25,13 @@ XENONNT = 4.0920440344790904e-47
 DARKSIDE = 1.9212420771126029e-47
 DARWIN = 5.895523679499314e-48
 ARGO = 3.6753483466448516e-48
-PURE_EW_SIGMA = 2.15e-47
+PURE_EW_SIGMA = 2.434770333230314e-47
 
 YUKAWA_LIMIT = np.sqrt(4.0 * np.pi)
 POINT_SIZE = 9
 CROSS_SIZE = 13
+X_LIMITS = (1.0e2, 1.0e8)
+Y_LIMITS = (9.0e-49, 2.0e-45)
 
 
 # === DATA LOADING AND PREPARATION ===
@@ -45,7 +47,6 @@ def load_scan(path):
 
 scan = load_scan(DATA_PATH)
 alpha = scan["alpha"]
-lambda_phi_sigma = scan["lambda_phi_sigma"]
 mHH = scan["mHH"]
 sigma_si = scan["sigma_si"]
 yXi_max = np.maximum.reduce(
@@ -59,16 +60,14 @@ yXi_max = np.maximum.reduce(
     ]
 )
 
-with np.errstate(divide="ignore", invalid="ignore"):
-    x_values = lambda_phi_sigma / mHH**2
-
+x_values = mHH
 y_values = sigma_si
 mask_yukawa = np.isfinite(yXi_max) & (yXi_max <= YUKAWA_LIMIT)
 mask_base = (
     mask_yukawa
     & np.isfinite(x_values)
     & np.isfinite(y_values)
-    & (mHH > 0.0)
+    & (x_values > 0.0)
     & (y_values > 0.0)
 )
 mask_good = mask_base & (np.cos(alpha) > 0.95)
@@ -122,9 +121,9 @@ ax.axhline(DARKSIDE, color=c3, linestyle="-.", linewidth=1.3, zorder=3)
 ax.axhline(DARWIN, color=c4, linestyle="-.", linewidth=1.3, zorder=3)
 ax.axhline(ARGO, color=c0, linestyle="-.", linewidth=1.3, zorder=3)
 ax.fill_between(
-    [-1.6e-7, 1.6e-7],
+    X_LIMITS,
     LZ,
-    1e-40,
+    1.0e-40,
     color=c_reg1,
     alpha=0.28,
     zorder=0,
@@ -136,10 +135,10 @@ ax.fill_between(
 line_label_style = {
     "va": "bottom",
     "ha": "right",
-    "fontsize": 9,
+    "fontsize": 11,
     "zorder": 10,
 }
-label_x = 0.97e-7
+label_x = 8.0e7
 ax.annotate(
     r"LUX-ZEPLIN $(4.5\mathrm{t}\times \mathrm{y})$",
     xy=(label_x, LZ),
@@ -165,26 +164,22 @@ ax.annotate(
     **line_label_style,
 )
 ax.annotate(
-    r"Minimal triplet model",
+    r"Minimal fermionic triplet",
     xy=(label_x, PURE_EW_SIGMA),
     xytext=(0, 3),
     textcoords="offset points",
-    color='red',
+    color="red",
     **line_label_style,
-    #va="top",
-    #ha="right",
-    #fontsize=9,
-    #zorder=10,
 )
 ax.annotate(
-    r"Dark-Side20k",
+    r"DarkSide-20k $(200\mathrm{t}\times \mathrm{y})$",
     xy=(label_x, DARKSIDE),
-    xytext=(0,-3),
+    xytext=(0, -3),
     textcoords="offset points",
     color=c3,
     va="top",
     ha="right",
-    fontsize=9,
+    fontsize=11,
     zorder=10,
 )
 ax.annotate(
@@ -197,16 +192,13 @@ ax.annotate(
 )
 
 
-# === AXES ===
-ax.set_xlabel(r"$\lambda_{\phi\sigma}/m_H^2\ [{\rm GeV}^{-2}]$")
-ax.set_ylabel(r"$\sigma^N_{\rm SI}\ [{\rm cm}^2]$")
+# === AXES AND LEGEND ===
+ax.set_xlabel(r"$m_H\ [{\rm GeV}]$")
+ax.set_ylabel(r"$\sigma_{\rm SI}\ [{\rm cm}^2]$")
+ax.set_xscale("log")
 ax.set_yscale("log")
-ax.set_xlim(-1.0e-7, 1.0e-7)
-ax.set_ylim(9e-49, 2e-45)
-
-x_formatter = ScalarFormatter(useMathText=True)
-x_formatter.set_powerlimits((0, 0))
-ax.xaxis.set_major_formatter(x_formatter)
+ax.set_xlim(*X_LIMITS)
+ax.set_ylim(*Y_LIMITS)
 
 
 # === EXPORT ===

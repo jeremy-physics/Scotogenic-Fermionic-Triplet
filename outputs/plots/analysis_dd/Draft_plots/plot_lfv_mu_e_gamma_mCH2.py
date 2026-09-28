@@ -16,34 +16,26 @@ if str(SRC_PATH) not in sys.path:
 if str(PLOT_TEMPLATE_PATH) not in sys.path:
     sys.path.insert(0, str(PLOT_TEMPLATE_PATH))
 
-from plot_template import (
-    c0, c1, c2, c3, c4, c5, c6, c_reg1, c_reg2, c_reg3, c_esc1, c_esc2, c_esc3
-)
-from constants import (
-    BR_mu_egamma_lim,
-    BR_mu_egamma_proy,
-    BR_tau_mugamma_lim,
-    BR_tau_mugamma_proy,
-)
+from plot_template import c1, c2, c_reg1, c_esc1
+from constants import BR_mu_egamma_lim, BR_mu_egamma_proy
 from variables import get_variable_label
 
 DATA_PATH = ROOT / "outputs" / "analyses" / "analysis_dd" / "data" / "scans" / "scan_lfv.dat"
-OUTPUT_PATH = Path(__file__).with_name("fig11_lfv_mu_tau.pdf")
-STYLE_PATH = ROOT / "styles" / "paper_style_colorbar.mplstyle"
+OUTPUT_PATH = Path(__file__).with_name("lfv_mu_e_gamma_mCH2.pdf")
+STYLE_PATH = ROOT / "styles" / "paper_style.mplstyle"
 
+MASS_VARIABLE = "mCH2"
 LZ = 7.413460268587916e-47
-XENONNT = 4.0920440344790904e-47
-DARKSIDE = 1.9212420771126029e-47
-DARWIN = 5.895523679499314e-48
-ARGO = 3.6753483466448516e-48
-PURE_EW_SIGMA = 2.15e-47
 YUKAWA_LIMIT = np.sqrt(4.0 * np.pi)
 POINT_SIZE = 9
-CROSS_SIZE = 13
 POINT_EDGE_COLOR = "none"
 POINT_LINEWIDTH = 0.0
-X_LIMITS = (1e-20, 1e-12)
-Y_LIMITS = (1e-20, 3e-8)
+X_LIMITS = (2.0e3, 2.0e7)
+Y_LIMITS = (1.0e-31, 1.0e-8)
+EXCLUDED_LABEL_X = 1.8e7
+EXCLUDED_LABEL_Y = 2.0e-10
+PROSPECT_LABEL_X = 1.8e7
+PROSPECT_LABEL_Y = BR_mu_egamma_proy * 0.60
 
 
 # === DATA LOADING AND PREPARATION ===
@@ -58,8 +50,8 @@ def load_scan(path):
 
 
 scan = load_scan(DATA_PATH)
-BR_mu_e = scan["BR_mu_e"]
-BR_tau_mu = scan["BR_tau_mu"]
+x_values = scan[MASS_VARIABLE]
+y_values = scan["BR_mu_e"]
 sigma_si = scan["sigma_si"]
 yXi_max = np.maximum.reduce(
     [
@@ -75,17 +67,15 @@ yXi_max = np.maximum.reduce(
 mask_yukawa = np.isfinite(yXi_max) & (yXi_max <= YUKAWA_LIMIT)
 mask_base = (
     mask_yukawa
-    & np.isfinite(BR_mu_e)
-    & np.isfinite(BR_tau_mu)
+    & np.isfinite(x_values)
+    & np.isfinite(y_values)
     & np.isfinite(sigma_si)
-    & (BR_mu_e > 0.0)
-    & (BR_tau_mu > 0.0)
+    & (x_values > 0.0)
+    & (y_values > 0.0)
     & (sigma_si > 0.0)
 )
 mask_lz = mask_base & (sigma_si > LZ)
 mask_kept = mask_base & ~mask_lz
-mask_allowed = mask_kept #& (BR_mu_e <= BR_mu_egamma_lim) & (BR_tau_mu <= BR_tau_mugamma_lim)
-mask_excluded = mask_kept & ~mask_allowed
 
 
 # === STYLE ===
@@ -103,33 +93,20 @@ fig, ax = plt.subplots(figsize=(6.0, 5.0))
 
 # === PLOTS ===
 ax.scatter(
-    BR_mu_e[mask_lz],
-    BR_tau_mu[mask_lz],
+    x_values[mask_lz],
+    y_values[mask_lz],
     marker="o",
-    color='lightgrey',
+    color="lightgrey",
     edgecolors=POINT_EDGE_COLOR,
     linewidths=POINT_LINEWIDTH,
     s=POINT_SIZE,
     alpha=0.6,
     rasterized=True,
-    zorder=0,
-    #label=r"$\sigma_{\rm SI}>{\rm LZ}$",
-)
-ax.scatter(
-    BR_mu_e[mask_excluded],
-    BR_tau_mu[mask_excluded],
-    marker="x",
-    color=c5,
-    linewidths=0.6,
-    s=CROSS_SIZE,
-    alpha=0.75,
-    rasterized=True,
     zorder=1,
-    #label=r"Current limit excluded",
 )
 ax.scatter(
-    BR_mu_e[mask_allowed],
-    BR_tau_mu[mask_allowed],
+    x_values[mask_kept],
+    y_values[mask_kept],
     marker="o",
     color=c2,
     edgecolors=POINT_EDGE_COLOR,
@@ -138,53 +115,52 @@ ax.scatter(
     alpha=0.9,
     rasterized=True,
     zorder=2,
-    #label=r"Current limit allowed",
 )
 
 
 # === LINES AND REGIONS ===
-ax.axvspan(BR_mu_egamma_lim, X_LIMITS[1], color=c_reg1, alpha=0.16, zorder=0)
-#ax.axhspan(BR_tau_mugamma_lim, Y_LIMITS[1], color=c5, alpha=0.16, zorder=0)
-ax.axvline(BR_mu_egamma_lim, color=c_esc1, linestyle="-", linewidth=1.2)
-#ax.axhline(BR_tau_mugamma_lim, color=c0, linestyle="-", linewidth=1.2, label=r"$\tau\to\mu\gamma$ limit")
-ax.axvline(BR_mu_egamma_proy, color=c1, linestyle="-.", linewidth=1.5, label=r"MEG-II prospect")
-ax.axhline(BR_tau_mugamma_proy, color=c0, linestyle="-.", linewidth=1.5, label=r"superKEKB/Belle-II prospect")
+ax.axhspan(BR_mu_egamma_lim, Y_LIMITS[1], color=c_reg1, alpha=0.18, zorder=0)
+ax.axhline(BR_mu_egamma_lim, color=c_esc1, linestyle="-", linewidth=1.2, zorder=3)
+ax.axhline(
+    BR_mu_egamma_proy,
+    color=c1,
+    linestyle="-.",
+    linewidth=1.5,
+    zorder=3,
+)
 
 
 # === TEXTS, ANNOTATIONS AND MARKERS ===
-
 ax.text(
-    #np.sqrt(BR_mu_egamma_lim * X_LIMITS[1]),
-    #np.sqrt(Y_LIMITS[0] * Y_LIMITS[1]),
-    3e-13,
-    2.5e-17,
-    r"excluded by MEG-II",
+    EXCLUDED_LABEL_X,
+    EXCLUDED_LABEL_Y,
+    r"excluded by MEG",
     color=c_esc1,
-    rotation=90,
-    ha="center",
+    ha="right",
     va="center",
     fontsize=13,
-    bbox={
-        "boxstyle": "round,pad=0.18",
-        "facecolor": "white",
-        "edgecolor": "none",
-        "alpha": 0.5,
-    },
+    zorder=10,
+)
+ax.text(
+    PROSPECT_LABEL_X,
+    PROSPECT_LABEL_Y,
+    r"MEG-II prospect",
+    color=c1,
+    ha="right",
+    va="top",
+    fontsize=13,
     zorder=10,
 )
 
+
 # === AXES AND LEGEND ===
-ax.set_xlabel(get_variable_label("BR_mu_e"))
-ax.set_ylabel(get_variable_label("BR_tau_mu"))
+mass_label = get_variable_label(MASS_VARIABLE).strip("$")
+ax.set_xlabel(rf"${mass_label}\ [\mathrm{{GeV}}]$")
+ax.set_ylabel(get_variable_label("BR_mu_e"))
 ax.set_xscale("log")
 ax.set_yscale("log")
 ax.set_xlim(*X_LIMITS)
 ax.set_ylim(*Y_LIMITS)
-legend = ax.legend(fontsize=12, loc="upper right", frameon=True)
-legend.get_frame().set_linewidth(1.0)
-legend.get_frame().set_alpha(1.0)
-legend.get_frame().set_edgecolor("black")
-legend.get_frame().set_boxstyle("Round,pad=0.1")
 
 
 # === EXPORT ===

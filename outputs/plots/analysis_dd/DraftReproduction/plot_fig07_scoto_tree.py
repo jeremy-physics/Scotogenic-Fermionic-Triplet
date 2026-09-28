@@ -16,8 +16,8 @@ if str(PLOT_TEMPLATE_PATH) not in sys.path:
 from plot_template import c5, c6
 
 DATA_PATH = ROOT / "outputs" / "analyses" / "analysis_dd" / "data" / "scans" / "scan_lfv.dat"
-OUTPUT_PATH = Path(__file__).with_name("fig07_scoto_tree.pdf")
-STYLE_PATH = ROOT / "styles" / "paper_style_colorbar.mplstyle"
+OUTPUT_PATH = Path(__file__).with_name("scoto_tree_1L.pdf")
+STYLE_PATH = ROOT / "styles" / "paper_style.mplstyle"
 
 YUKAWA_LIMIT = np.sqrt(4.0 * np.pi)
 POINT_SIZE = 9
@@ -110,12 +110,12 @@ ax.scatter(
 
 
 # === AXES AND LEGEND ===
-ax.set_xlabel(r"$|f^{\rm tree}_q|$")
-ax.set_ylabel(r"$|f^{\rm scot}_q|$")
+ax.set_xlabel(r"$|f^{\rm scoto,tree}_q|$")
+ax.set_ylabel(r"$|f^{\rm scoto,1L}_q|$")
 ax.set_xscale("log")
 ax.set_yscale("log")
-ax.set_xlim(5e-18, 2e-8)
-ax.set_ylim(5e-24, 2e-15)
+ax.set_xlim(1e-20, 4e-8)
+ax.set_ylim(1e-24, 1e-12)
 
 
 # === EXPORT ===

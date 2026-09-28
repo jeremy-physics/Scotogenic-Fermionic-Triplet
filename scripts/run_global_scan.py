@@ -25,7 +25,7 @@ LABELS_HEADER = None
 # === USER/AGENT CONFIGURATION END ===
 
 # --- Path Configuration ---
-CURRENT_DIR = Path(os.path.abspath(__file__)).parent
+CURRENT_DIR = Path(os.path.abspath(__file__)).parenrt
 PROJECT_ROOT = CURRENT_DIR.parent
 PROJECT_SRC = PROJECT_ROOT / "src"
 

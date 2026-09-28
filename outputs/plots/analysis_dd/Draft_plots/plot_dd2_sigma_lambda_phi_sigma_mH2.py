@@ -17,7 +17,7 @@ if str(PLOT_TEMPLATE_PATH) not in sys.path:
 from plot_template import c0, c1, c3, c4, c5, c6, c_reg1, c_esc1
 
 DATA_PATH = ROOT / "outputs" / "analyses" / "analysis_dd" / "data" / "scans" / "scan_lfv.dat"
-OUTPUT_PATH = Path(__file__).with_name("fig12_sigma_lambda_phi_sigma_mH2.pdf")
+OUTPUT_PATH = Path(__file__).with_name("DD_lambdaphisigma_mH2.pdf")
 STYLE_PATH = ROOT / "styles" / "paper_style_colorbar.mplstyle"
 
 LZ = 7.413460268587916e-47
@@ -25,7 +25,7 @@ XENONNT = 4.0920440344790904e-47
 DARKSIDE = 1.9212420771126029e-47
 DARWIN = 5.895523679499314e-48
 ARGO = 3.6753483466448516e-48
-PURE_EW_SIGMA = 2.15e-47
+PURE_EW_SIGMA = 2.434770333230314e-47
 
 YUKAWA_LIMIT = np.sqrt(4.0 * np.pi)
 POINT_SIZE = 9
@@ -136,7 +136,7 @@ ax.fill_between(
 line_label_style = {
     "va": "bottom",
     "ha": "right",
-    "fontsize": 9,
+    "fontsize": 11,
     "zorder": 10,
 }
 label_x = 0.97e-7
@@ -165,7 +165,7 @@ ax.annotate(
     **line_label_style,
 )
 ax.annotate(
-    r"Minimal triplet model",
+    r"Minimal fermionic triplet",
     xy=(label_x, PURE_EW_SIGMA),
     xytext=(0, 3),
     textcoords="offset points",
@@ -177,14 +177,14 @@ ax.annotate(
     #zorder=10,
 )
 ax.annotate(
-    r"Dark-Side20k",
+    r"DarkSide-20k $(200\mathrm{t}\times \mathrm{y})$",
     xy=(label_x, DARKSIDE),
     xytext=(0,-3),
     textcoords="offset points",
     color=c3,
     va="top",
     ha="right",
-    fontsize=9,
+    fontsize=11,
     zorder=10,
 )
 ax.annotate(
@@ -199,7 +199,7 @@ ax.annotate(
 
 # === AXES ===
 ax.set_xlabel(r"$\lambda_{\phi\sigma}/m_H^2\ [{\rm GeV}^{-2}]$")
-ax.set_ylabel(r"$\sigma^N_{\rm SI}\ [{\rm cm}^2]$")
+ax.set_ylabel(r"$\sigma_{\rm SI}\ [{\rm cm}^2]$")
 ax.set_yscale("log")
 ax.set_xlim(-1.0e-7, 1.0e-7)
 ax.set_ylim(9e-49, 2e-45)

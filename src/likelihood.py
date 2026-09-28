@@ -129,7 +129,7 @@ def _build_values(params, effective_settings):
             z,
         ) = p_phys
 
-        mXi = 2600.0#float(getattr(effective_settings, "FERMION_DM_MASS", 2600.0))
+        mXi = 2860.0#float(getattr(effective_settings, "FERMION_DM_MASS", 2600.0))
         vsigma = 0.5 * mXi / zXi
         lambda_phi = _lambda_phi_from_higgs_mass(vsigma, lambda_phi_sigma, lambda_sigma)
 

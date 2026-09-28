@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("pgf")
 import matplotlib.pyplot as plt
+from matplotlib import colors
 
 
 # === GLOBAL PLOT CONFIGURATION ===
@@ -28,7 +29,7 @@ from constants import (
 from variables import get_variable_label
 
 DATA_PATH = ROOT / "outputs" / "analyses" / "analysis_dd" / "data" / "scans" / "scan_lfv.dat"
-OUTPUT_PATH = Path(__file__).with_name("fig11_lfv_mu_tau.pdf")
+OUTPUT_PATH = Path(__file__).with_name("fig11_lfv_mu_tau_log10_mCH1.pdf")
 STYLE_PATH = ROOT / "styles" / "paper_style_colorbar.mplstyle"
 
 LZ = 7.413460268587916e-47
@@ -42,6 +43,7 @@ POINT_SIZE = 9
 CROSS_SIZE = 13
 POINT_EDGE_COLOR = "none"
 POINT_LINEWIDTH = 0.0
+COLOR_LIMITS = (3.4, 6.2)
 X_LIMITS = (1e-20, 1e-12)
 Y_LIMITS = (1e-20, 3e-8)
 
@@ -61,6 +63,7 @@ scan = load_scan(DATA_PATH)
 BR_mu_e = scan["BR_mu_e"]
 BR_tau_mu = scan["BR_tau_mu"]
 sigma_si = scan["sigma_si"]
+mCH1 = scan["mCH1"]
 yXi_max = np.maximum.reduce(
     [
         scan["yXi11_abs"],
@@ -72,15 +75,20 @@ yXi_max = np.maximum.reduce(
     ]
 )
 
+with np.errstate(divide="ignore", invalid="ignore"):
+    log10_mCH1 = np.log10(mCH1)
+
 mask_yukawa = np.isfinite(yXi_max) & (yXi_max <= YUKAWA_LIMIT)
 mask_base = (
     mask_yukawa
     & np.isfinite(BR_mu_e)
     & np.isfinite(BR_tau_mu)
     & np.isfinite(sigma_si)
+    & np.isfinite(log10_mCH1)
     & (BR_mu_e > 0.0)
     & (BR_tau_mu > 0.0)
     & (sigma_si > 0.0)
+    & (mCH1 > 0.0)
 )
 mask_lz = mask_base & (sigma_si > LZ)
 mask_kept = mask_base & ~mask_lz
@@ -102,6 +110,10 @@ fig, ax = plt.subplots(figsize=(6.0, 5.0))
 
 
 # === PLOTS ===
+cmap = plt.get_cmap("Spectral").copy()
+cmap.set_under("lightgrey")
+cmap.set_over("lightgrey")
+norm = colors.Normalize(vmin=COLOR_LIMITS[0], vmax=COLOR_LIMITS[1])
 ax.scatter(
     BR_mu_e[mask_lz],
     BR_tau_mu[mask_lz],
@@ -127,11 +139,13 @@ ax.scatter(
     zorder=1,
     #label=r"Current limit excluded",
 )
-ax.scatter(
+scatter = ax.scatter(
     BR_mu_e[mask_allowed],
     BR_tau_mu[mask_allowed],
     marker="o",
-    color=c2,
+    c=log10_mCH1[mask_allowed],
+    cmap=cmap,
+    norm=norm,
     edgecolors=POINT_EDGE_COLOR,
     linewidths=POINT_LINEWIDTH,
     s=POINT_SIZE,
@@ -185,6 +199,13 @@ legend.get_frame().set_linewidth(1.0)
 legend.get_frame().set_alpha(1.0)
 legend.get_frame().set_edgecolor("black")
 legend.get_frame().set_boxstyle("Round,pad=0.1")
+
+cbar_ax = ax.inset_axes([0.0, 1.03, 1.0, 0.045], transform=ax.transAxes)
+cbar = fig.colorbar(scatter, cax=cbar_ax, orientation="horizontal", extend="both")
+cbar.set_label(r"$\log_{10}(m_{H_1^\pm}/{\rm GeV})$", fontsize=16)
+cbar.ax.xaxis.set_ticks_position("top")
+cbar.ax.xaxis.set_label_position("top")
+cbar.ax.tick_params(direction="in", labelsize=12, pad=2)
 
 
 # === EXPORT ===

@@ -18,6 +18,7 @@ from plot_template import (
     c0,
     c1,
     c2,
+    c3,
     c4,
     c5,
     c6,
@@ -29,10 +30,11 @@ DATA_PATH = ROOT / "outputs" / "analyses" / "analysis_dd" / "data" / "scans" / "
 OUTPUT_PATH = Path(__file__).with_name("fig05_sigma_mH.pdf")
 STYLE_PATH = ROOT / "styles" / "paper_style_colorbar.mplstyle"
 
-LZ = 8.78658722623048e-47
-XENONNT = 4.484204325419306e-47
-DARWIN = 2.67279895071297e-47
-ARGO = 8.130408367888161e-48
+LZ = 7.413460268587916e-47
+XENONNT = 4.0920440344790904e-47
+DARKSIDE = 1.9212420771126029e-47
+DARWIN = 5.895523679499314e-48
+ARGO = 3.6753483466448516e-48
 PURE_EW_SIGMA = 2.15e-47
 
 YUKAWA_LIMIT = np.sqrt(4.0 * np.pi)
@@ -119,6 +121,7 @@ ax.scatter(
 ax.axhline(LZ, color=c_esc1, linestyle="-", linewidth=1.2, zorder=3)
 ax.axhline(PURE_EW_SIGMA, color='red', linestyle="-", linewidth=1.1, zorder=3)
 ax.axhline(XENONNT, color=c1, linestyle="-.", linewidth=1.3, zorder=3)
+ax.axhline(DARKSIDE, color=c3, linestyle="-.", linewidth=1.3, zorder=3)
 ax.axhline(DARWIN, color=c4, linestyle="-.", linewidth=1.3, zorder=3)
 ax.axhline(ARGO, color=c0, linestyle="-.", linewidth=1.3, zorder=3)
 ax.fill_between(x_band, LZ, 1e-40, color=c_reg1, alpha=0.28, zorder=0, rasterized=True)
@@ -171,9 +174,21 @@ ax.annotate(
 ax.annotate(
     r"Minimal triplet model",
     xy=(4.2e5, PURE_EW_SIGMA),
-    xytext=(0, -4),
+    xytext=(0, 3),
     textcoords="offset points",
     color='red',
+    **line_label_style,
+    #va="top",
+    #ha="right",
+    #fontsize=9,
+    #zorder=10,
+)
+ax.annotate(
+    r"Dark-Side20k",
+    xy=(4.2e5, DARKSIDE),
+    xytext=(0,-2),
+    textcoords="offset points",
+    color=c3,
     va="top",
     ha="right",
     fontsize=9,

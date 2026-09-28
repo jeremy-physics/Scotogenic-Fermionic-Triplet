@@ -232,7 +232,7 @@ mc = 1.273
 mt = 172.56
 muhad = 1.0
 sw = np.sqrt(0.23122)
-mXi = 2600.0
+mXi = 2860.0
 mh = 125.2
 Cfact = 0.389379e-27
 alpha2 = mW**2 / (pi * v**2)
@@ -267,28 +267,126 @@ def gamma_alpha(n, alpha_s):
 fTq = 0.0423 + 0.0563
 
 
-def fq(alpha, alpha_s, mh_light, mH):
+def gH(x):
+    sqrt_x = np.sqrt(x)
+    sqrt_one_minus_x_over_4 = np.sqrt(1.0 - x / 4.0)
+    atan_x = np.arctan(2.0 * sqrt_one_minus_x_over_4 / sqrt_x)
     return (
-        -((pi * alpha2**2) / (2.0 * mW))
-        * (1.0 + 0.39 * alpha_s)
-        * (np.cos(alpha) ** 2 / mh_light**2 + np.sin(alpha) ** 2 / mH**2)
+        2.0 * sqrt_x * (2.0 - x * np.log(x))
+        - 2.0
+        / sqrt_one_minus_x_over_4
+        * (2.0 + 2.0 * x - x**2)
+        * atan_x
     )
 
 
-def fb(alpha, alpha_s, mh_light, mH):
+def gB1(x):
+    sqrt_x = np.sqrt(x)
+    sqrt_one_minus_x_over_4 = np.sqrt(1.0 - x / 4.0)
+    atan_x = np.arctan(2.0 * sqrt_one_minus_x_over_4 / sqrt_x)
     return (
-        -((pi * alpha2**2) / (2.0 * mW))
-        * (1.0 + 0.003 * alpha_s)
-        * (np.cos(alpha) ** 2 / mh_light**2 + np.sin(alpha) ** 2 / mH**2)
+        (1.0 / 24.0) * sqrt_x * (2.0 - x * np.log(x))
+        + 1.0
+        / (24.0 * sqrt_one_minus_x_over_4)
+        * (4.0 - 2.0 * x + x**2)
+        * atan_x
     )
 
 
-def fG(alpha, alpha_s, mh_light, mH):
+def gbtm(x, y):
+    sqrt_x = np.sqrt(x)
+    sqrt_y = np.sqrt(y)
+    sqrt_one_minus_x_over_4 = np.sqrt(1.0 - x / 4.0)
+    sqrt_one_minus_y_over_4 = np.sqrt(1.0 - y / 4.0)
+    atan_x = np.arctan(2.0 * sqrt_one_minus_x_over_4 / sqrt_x)
+    atan_y = np.arctan(2.0 * sqrt_one_minus_y_over_4 / sqrt_y)
+    x_minus_y = x - y
+
     return (
-        alpha2**2
-        / (4.0 * mW)
-        * (1.86 + 0.93 * alpha_s)
-        * (np.cos(alpha) ** 2 / mh_light**2 + np.sin(alpha) ** 2 / mH**2)
+        -(x ** (3.0 / 2.0) * y) / (12.0 * x_minus_y**2)
+        - (x ** (5.0 / 2.0) * y**2)
+        / (24.0 * x_minus_y**3)
+        * np.log(x / y)
+        - x
+        * y
+        * (2.0 * y + 6.0 * x + 2.0 * x * y - x**2 * y)
+        / (24.0 * sqrt_one_minus_x_over_4 * x_minus_y**3)
+        * atan_x
+        + x ** (3.0 / 2.0)
+        * sqrt_y
+        * (2.0 * x + 6.0 * y + 2.0 * x * y - x * y**2)
+        / (24.0 * sqrt_one_minus_y_over_4 * x_minus_y**3)
+        * atan_y
+    )
+
+
+def gtop(x, y):
+    sqrt_x = np.sqrt(x)
+    sqrt_y = np.sqrt(y)
+    sqrt_one_minus_x_over_4 = np.sqrt(1.0 - x / 4.0)
+    sqrt_one_minus_y_over_4 = np.sqrt(1.0 - y / 4.0)
+    atan_x = np.arctan(2.0 * sqrt_one_minus_x_over_4 / sqrt_x)
+    atan_y = np.arctan(2.0 * sqrt_one_minus_y_over_4 / sqrt_y)
+    x_minus_y = x - y
+
+    return (
+        x ** (3.0 / 2.0) / (12.0 * x_minus_y)
+        - x ** (5.0 / 2.0)
+        * (x - 2.0 * y)
+        / (24.0 * x_minus_y**2)
+        * np.log(x)
+        - x ** (3.0 / 2.0)
+        * y**2
+        / (24.0 * x_minus_y**2)
+        * np.log(y)
+        + x
+        * (x**3 + 4.0 * y + 4.0 * x * (1.0 + y) - 2.0 * x**2 * (1.0 + y))
+        / (24.0 * sqrt_one_minus_x_over_4 * x_minus_y**2)
+        * atan_x
+        - x ** (3.0 / 2.0)
+        * sqrt_y
+        * sqrt_one_minus_y_over_4
+        * (2.0 + y)
+        / (6.0 * x_minus_y**2)
+        * atan_y
+    )
+
+
+def fq(alpha, alpha_s, mh_light, mH, mXi_value):
+    x = mW**2 / mXi_value**2
+    higgs_factor = np.cos(alpha) ** 2 / mh_light**2 + np.sin(alpha) ** 2 / mH**2
+    return (
+        (alpha2**2 / 4.0) * higgs_factor * gH(x) / mW
+        + alpha2**2
+        / mW**3
+        * (alpha_s / (4.0 * pi))
+        * (-12.0 * gB1(x))
+    )
+
+
+def fb(alpha, alpha_s, mh_light, mH, mXi_value):
+    x = mW**2 / mXi_value**2
+    y = mt**2 / mXi_value**2
+    higgs_factor = np.cos(alpha) ** 2 / mh_light**2 + np.sin(alpha) ** 2 / mH**2
+    return (
+        (alpha2**2 / 4.0) * higgs_factor * gH(x) / mW
+        + alpha2**2 / mW**3 * (-3.0 * gbtm(x, y))
+    )
+
+
+def fG(alpha, alpha_s, mh_light, mH, mXi_value):
+    x = mW**2 / mXi_value**2
+    y = mt**2 / mXi_value**2
+    higgs_factor = np.cos(alpha) ** 2 / mh_light**2 + np.sin(alpha) ** 2 / mH**2
+    return (
+        -(alpha2**2 / 48.0)
+        * higgs_factor
+        * (1.0 + 11.0 * alpha_s / (4.0 * pi))
+        * gH(x)
+        / mW
+        + alpha2**2
+        / (4.0 * mW**3)
+        * ((2.0 + 7.0 * alpha_s / (3.0 * pi)) * gB1(x) + gtop(x, y))
     )
 
 
@@ -349,15 +447,15 @@ def C0_wolfram(mXi_value, alpha, vsigma, mh_light, mh2):
     )
 
 
-def ew_coefficients(alpha, mh_light, mH):
+def ew_coefficients(mXi_value, alpha, mh_light, mH):
     Cqz5 = np.array(
         [
-            [fq(alpha, alpha5mz, mh_light, mH)],
-            [fq(alpha, alpha5mz, mh_light, mH)],
-            [fq(alpha, alpha5mz, mh_light, mH)],
-            [fq(alpha, alpha5mz, mh_light, mH)],
-            [fb(alpha, alpha5mz, mh_light, mH)],
-            [fG(alpha, alpha5mz, mh_light, mH)],
+            [fq(alpha, alpha5mz, mh_light, mH, mXi_value)],
+            [fq(alpha, alpha5mz, mh_light, mH, mXi_value)],
+            [fq(alpha, alpha5mz, mh_light, mH, mXi_value)],
+            [fq(alpha, alpha5mz, mh_light, mH, mXi_value)],
+            [fb(alpha, alpha5mz, mh_light, mH, mXi_value)],
+            [fG(alpha, alpha5mz, mh_light, mH, mXi_value)],
         ],
         dtype=float,
     )
@@ -374,7 +472,14 @@ def ew_coefficients(alpha, mh_light, mH):
 def tree_coefficients(mXi_value, alpha, vsigma, mh_light, mh2):
     c0 = C0_wolfram(mXi_value, alpha, vsigma, mh_light, mh2)
     Cqtreet5 = -np.array(
-        [[c0], [c0], [c0], [c0], [c0], [-(1.0 / 8.0) * c0]],
+        [
+            [c0],
+            [c0],
+            [c0],
+            [c0],
+            [c0],
+            [-(1.0 / 12.0) * (1.0 + 11.0 * alpha5mz / (4.0 * pi)) * c0],
+        ],
         dtype=float,
     )
     Cqtreeb4 = (
@@ -531,7 +636,11 @@ def f_scoto(
             [fq_scoto],
             [fq_scoto],
             [fq_scoto],
-            [-(1.0 / 8.0) * fq_scoto],
+            [
+                -(1.0 / 12.0)
+                * (1.0 + 11.0 * alpha5mz / (4.0 * pi))
+                * fq_scoto
+            ],
         ],
         dtype=complex,
     )
@@ -550,8 +659,8 @@ def f_scoto(
     return float(np.real(mN * kSscot))
 
 
-def f_EW(alpha, mh_light, mH):
-    fqR, fGR = ew_coefficients(alpha, mh_light, mH)
+def f_EW(mXi_value, alpha, mh_light, mH):
+    fqR, fGR = ew_coefficients(mXi_value, alpha, mh_light, mH)
     kS = fqR * fTq + fGR * fTG(3, alpha3muhad)
     kT = (3.0 / 4.0) * np.sum((Q + Qb) * (g1(alpha5mz) + g2(alpha5mz))) - (
         3.0 / 4.0
@@ -586,7 +695,7 @@ def sigma_SIf(
     lamb_eta2_phi,
     lamb_eta2_sigma,
 ):
-    fEW = f_EW(alpha, mh_light, mH)
+    fEW = f_EW(mXi_value, alpha, mh_light, mH)
     ftree = f_tree(mXi_value, vsigma, alpha, mh_light, mH)
     fscoto = f_scoto(
         mXi_value,

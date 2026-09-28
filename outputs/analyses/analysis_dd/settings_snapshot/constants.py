@@ -2,6 +2,7 @@ import numpy as np
 
 # ----------------- Datos experimentales -----------------
 #Quarks masses at the Z-boson scale from 2009.04851
+'''
 mu_exp = 1.23e-3
 mc_exp = 0.620
 mt_exp = 168.26
@@ -15,9 +16,8 @@ mt_err = 0.75
 md_err = 0.19e-3
 ms_err = 4.61e-3
 mb_err = 0.026
-
-#Quarks masses at the pole-mass scale from PDG 06-2026
 '''
+#Quarks masses at the pole-mass scale from PDG 06-2026
 mu_exp = 2.16e-3
 mc_exp = 1.2729
 mt_exp = 172.60
@@ -31,7 +31,6 @@ mt_err = 0.27
 md_err = 0.07e-3
 ms_err = 0.07e-3
 mb_err = 0.006
-'''
 
 #---------------------------------------
 
@@ -266,7 +265,7 @@ BR_tau_mugamma_lim = 4.4e-8
 BR_tau_mugamma_proy = 4.4e-9
 BR_tau_egamma_lim = 3.3e-8
 BR_tau_egamma_proy = 3.3e-9
-BR_mu_3e_proy = 1e-12
+BR_mu_3e_proy = 1e-16
 CR_muAl_e_proy = 1e-18
 
 # LFV quark charges and nucleon form factors

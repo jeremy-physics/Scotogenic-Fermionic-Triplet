@@ -45,6 +45,7 @@ def compute_restriction_penalty(values, settings=None):
     sum_nu = _get_restriction_value(values, "sum_nu")
     neutrino_sum_lower_limit = nu_sup_inf * 1e-9
     neutrino_sum_upper_limit = nu_sup_exp * 1e-9
+    yukawa_perturbativity_limit = np.sqrt(4.0 * np.pi)
 
     pen_neutrino_sum_lower = 0.0
     pen_neutrino_sum_upper = 0.0
@@ -57,9 +58,46 @@ def compute_restriction_penalty(values, settings=None):
         violation = sum_nu - neutrino_sum_upper_limit
         pen_neutrino_sum_upper = 1e12 * violation**2
 
+    yXi11_abs = _get_restriction_value(values, "yXi11_abs", default=np.nan)
+    yXi12_abs = _get_restriction_value(values, "yXi12_abs", default=np.nan)
+    yXi21_abs = _get_restriction_value(values, "yXi21_abs", default=np.nan)
+    yXi22_abs = _get_restriction_value(values, "yXi22_abs", default=np.nan)
+    yXi31_abs = _get_restriction_value(values, "yXi31_abs", default=np.nan)
+    yXi32_abs = _get_restriction_value(values, "yXi32_abs", default=np.nan)
+
+    max_yXi_abs = max(
+        yXi11_abs,
+        yXi12_abs,
+        yXi21_abs,
+        yXi22_abs,
+        yXi31_abs,
+        yXi32_abs,
+    )
+
+    pen_yXi_perturbativity = 0.0
+    if (
+        not np.isfinite(yXi11_abs)
+        or not np.isfinite(yXi12_abs)
+        or not np.isfinite(yXi21_abs)
+        or not np.isfinite(yXi22_abs)
+        or not np.isfinite(yXi31_abs)
+        or not np.isfinite(yXi32_abs)
+        or yXi11_abs < 0.0
+        or yXi12_abs < 0.0
+        or yXi21_abs < 0.0
+        or yXi22_abs < 0.0
+        or yXi31_abs < 0.0
+        or yXi32_abs < 0.0
+    ):
+        pen_yXi_perturbativity = 1e20
+    elif max_yXi_abs > yukawa_perturbativity_limit:
+        violation = max_yXi_abs / yukawa_perturbativity_limit - 1.0
+        pen_yXi_perturbativity = 1e20 * violation**2
+
     penalties = {
         "neutrino_mass_sum_lower": pen_neutrino_sum_lower,
         "neutrino_mass_sum_upper": pen_neutrino_sum_upper,
+        "yXi_perturbativity": pen_yXi_perturbativity,
     }
 
     active_observables = getattr(settings, "ACTIVE_OBSERVABLES", []) if settings is not None else []

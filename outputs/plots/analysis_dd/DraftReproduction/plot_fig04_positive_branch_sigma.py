@@ -34,10 +34,11 @@ DATA_PATH = ROOT / "outputs" / "analyses" / "analysis_dd" / "data" / "scans" / "
 OUTPUT_PATH = Path(__file__).with_name("fig04_positive_branch_sigma.pdf")
 STYLE_PATH = ROOT / "styles" / "paper_style_colorbar.mplstyle"
 
-LZ = 8.78658722623048e-47
-XENONNT = 4.484204325419306e-47
-DARWIN = 2.67279895071297e-47
-ARGO = 8.130408367888161e-48
+LZ = 7.413460268587916e-47
+XENONNT = 4.0920440344790904e-47
+DARKSIDE = 1.9212420771126029e-47
+DARWIN = 5.895523679499314e-48
+ARGO = 3.6753483466448516e-48
 PURE_EW_SIGMA = 2.15e-47
 
 YUKAWA_LIMIT = np.sqrt(4.0 * np.pi)
@@ -58,9 +59,7 @@ def load_scan(path):
 
 scan = load_scan(DATA_PATH)
 alpha = scan["alpha"]
-mh = scan["mh"]
-mHH = scan["mHH"]
-zXi = scan["zXi"]
+fscoto = scan["ftree"]
 sigma_si = scan["sigma_si"]
 yXi_max = np.maximum.reduce(
     [
@@ -73,11 +72,8 @@ yXi_max = np.maximum.reduce(
     ]
 )
 
-with np.errstate(divide="ignore", invalid="ignore"):
-    zeta_dd = zXi * np.sin(2.0 * alpha) * (1.0 - mh**2 / mHH**2)
-
-branch = zeta_dd > 0.0
-x_values = zeta_dd
+branch = fscoto > 0.0
+x_values = fscoto*1e8
 y_values = sigma_si
 mask_yukawa = np.isfinite(yXi_max) & (yXi_max <= YUKAWA_LIMIT)
 mask_base = (
@@ -90,7 +86,7 @@ mask_base = (
 )
 mask_good = mask_base & (np.cos(alpha) > 0.95)
 mask_out = mask_base & ~mask_good
-x_band = np.logspace(-10, 0, 200)
+x_band = np.logspace(-25, -12, 200)
 
 
 # === STYLE ===
@@ -136,10 +132,10 @@ ax.scatter(
 # === LINES AND REGIONS ===
 ax.axhline(LZ, color=c_esc1, linestyle="-", linewidth=1.2, label=r"LUX-ZEPLIN $(4.5\mathrm{t}\times \mathrm{y})$", zorder=3)
 ax.axhline(PURE_EW_SIGMA, color='red', linestyle="-", linewidth=1.1, label=r"Minimal Fermionic triplet DM", zorder=3)
-ax.axhline(XENONNT, color=c1, linestyle="-.", linewidth=1.3, label=r"XENONnT $(20\mathrm{t}\times \mathrm{y})$", zorder=3)
-ax.axhline(DARWIN, color=c4, linestyle="-.", linewidth=1.3, label=r"DARWIN $(200\mathrm{t}\times \mathrm{y})$", zorder=3)
+#ax.axhline(XENONNT, color=c1, linestyle="-.", linewidth=1.3, label=r"XENONnT $(20\mathrm{t}\times \mathrm{y})$", zorder=3)
+#ax.axhline(DARWIN, color=c4, linestyle="-.", linewidth=1.3, label=r"DARWIN $(200\mathrm{t}\times \mathrm{y})$", zorder=3)
 #ax.axhline(ARGO, color=c0, linestyle="-.", linewidth=1.3, label=r"ARGO $(4000\mathrm{t}\times \mathrm{y})$", zorder=3)
-ax.fill_between(x_band, LZ, 1e-40, color=c_reg1, alpha=0.28, zorder=0, rasterized=True)
+#ax.fill_between(x_band, LZ, 1e-40, color=c_reg1, alpha=0.28, zorder=0, rasterized=True)
 
 
 # === TEXTS, ANNOTATIONS AND MARKERS ===
@@ -156,20 +152,56 @@ ax.text(
     zorder=10,
 )
 '''
+line_label_style = {
+    "va": "bottom",
+    "ha": "right",
+    "fontsize": 9,
+    "zorder": 10,
+}
+line_label_style2 = {
+    "va": "bottom",
+    "ha": "right",
+    "fontsize": 12,
+    "zorder": 10,
+}
+ax.annotate(
+    r"LUX-ZEPLIN $(4.5\mathrm{t}\times \mathrm{y})$",
+    xy=(5e-4, LZ),
+    xytext=(0, 3),
+    textcoords="offset points",
+    color=c_esc1,
+    **line_label_style,
+)
+
+ax.annotate(
+    r"$f^{\rm scoto}>0$",
+    xy=(1.3e-4, 5e-45),
+    xytext=(0, 0),
+    textcoords="offset points",
+    color='black',
+    **line_label_style2,
+    bbox={
+        "boxstyle": "round,pad=0.3",
+        "facecolor": "white",
+        "edgecolor": "black",
+        "alpha": 0.9,
+    },
+)
 
 # === AXES AND LEGEND ===
-ax.set_xlabel(r"$\zeta_\Xi^{\rm DD}>0$")
+ax.set_xlabel(r"$f^{\rm scoto}\,\times 10^{-8}$ [GeV$^{-3}$]")
 ax.set_ylabel(r"$\sigma^N_{\rm SI}\ [{\rm cm}^2]$")
 ax.set_xscale("log")
 ax.set_yscale("log")
-ax.set_xlim(1e-7, 0.8e-1)
-ax.set_ylim(1.7e-47, 1.3e-46)
+ax.set_xlim(2e-5, 4e-1)
+ax.set_ylim(1.7e-47, 0.8e-44)
+'''
 legend = ax.legend(fontsize=10, loc="upper left", frameon=True)
 legend.get_frame().set_linewidth(1.0)
 legend.get_frame().set_alpha(1.0)
 legend.get_frame().set_edgecolor("black")
 legend.get_frame().set_boxstyle("Round,pad=0.1")
-
+'''
 
 # === EXPORT ===
 fig.savefig(OUTPUT_PATH, format="pdf", dpi=300, bbox_inches="tight")
